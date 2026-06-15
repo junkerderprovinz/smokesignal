@@ -1,0 +1,57 @@
+<?xml version='1.0' standalone='yes'?>
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "smokesignal">
+<!ENTITY author    "junkerderprovinz">
+<!ENTITY version   "2026.06.15">
+<!ENTITY launch    "Main">
+<!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
+<!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
+<!ENTITY pkgURL    "https://github.com/junkerderprovinz/smokesignal/releases/download/v&version;/smokesignal-&version;.txz">
+<!ENTITY emhttp    "/usr/local/emhttp/plugins/&name;">
+<!ENTITY plgPath   "/boot/config/plugins/&name;">
+]>
+
+<PLUGIN name="&name;"
+        author="&author;"
+        version="&version;"
+        launch="&launch;"
+        pluginURL="&pluginURL;"
+        icon="fa-fire"
+        min="6.10.0"
+        support="https://github.com/junkerderprovinz/smokesignal/issues">
+
+  <CHANGES>
+## &version;
+- Initial release. Pre-reboot health check with a single verdict: GO / CAUTION / NO-GO.
+- Adds a "SmokeSignal: Check now" button to the Main tab (next to Reboot where possible).
+- Advisory only: reads the host state, never changes anything.
+  </CHANGES>
+
+  <!-- Download the package from the GitHub release -->
+  <FILE Name="&plgPath;/smokesignal-&version;.txz">
+    <URL>&pkgURL;</URL>
+  </FILE>
+
+  <!-- Install -->
+  <FILE Run="/bin/bash">
+    <INLINE>
+      echo "Installing SmokeSignal &version; ..."
+      upgradepkg --install-new --reinstall "&plgPath;/smokesignal-&version;.txz"
+      # Enforce the exec bit on the engine (NTFS/CI builds can drop it)
+      chmod +x "&emhttp;/smokesignal-check.sh" 2>/dev/null
+      echo ""
+      echo "SmokeSignal &version; installed. Open the Main tab and click 'SmokeSignal: Check now'."
+    </INLINE>
+  </FILE>
+
+  <!-- Remove -->
+  <REMOVE>
+    <INLINE>
+      removepkg "&name;" 2>/dev/null
+      rm -rf "&emhttp;"
+      rm -rf "&plgPath;"
+      echo "SmokeSignal removed."
+    </INLINE>
+  </REMOVE>
+
+</PLUGIN>
