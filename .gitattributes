@@ -1,0 +1,5 @@
+# Force LF everywhere — the shell engine and .page/.php run on Linux (Unraid).
+* text=auto eol=lf
+
+# Binary assets
+*.png -text
