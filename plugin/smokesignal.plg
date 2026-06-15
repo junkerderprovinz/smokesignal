@@ -2,7 +2,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "2026.06.15">
+<!ENTITY version   "2026.06.16">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -21,9 +21,14 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
-## &version;
+## 2026.06.16
+- Array check now lists the exact unhealthy device assignments (disk/parity/cache + status), not just counts.
+- Report window follows the configured Unraid light/dark theme.
+- Main tab: only the button next to Reboot now — no separate section.
+
+## 2026.06.15
 - Initial release. Pre-reboot health check with a single verdict: GO / CAUTION / NO-GO.
-- Adds a "SmokeSignal: Check now" button to the Main tab (next to Reboot where possible).
+- Adds a button to the Main tab (next to Reboot).
 - Advisory only: reads the host state, never changes anything.
   </CHANGES>
 

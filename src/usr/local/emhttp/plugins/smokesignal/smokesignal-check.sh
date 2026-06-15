@@ -68,18 +68,36 @@ have() { command -v "$1" >/dev/null 2>&1; }
 #  CRITICAL  (a FAIL here means NO-GO)
 # =============================================================================
 
-# ---- Array state ------------------------------------------------------------
+# ---- Array state + every device assignment ----------------------------------
 MDCMD=/usr/local/sbin/mdcmd
+DISKSINI=/var/local/emhttp/disks.ini
+
+# Walk every assigned slot (array data, parity, cache pools) and collect any
+# device whose status is not OK -- skipping genuinely empty slots (DISK_NP).
+bad_devs=""
+if [ -r "$DISKSINI" ]; then
+  bad_devs="$(awk '
+    function flush(){ if (name!="" && st!="" && st!="DISK_OK" && st!="DISK_NP") printf "%s=%s ", name, st }
+    /^\[/      { flush(); name=""; st="" }
+    /^name=/   { v=$0; sub(/^name="?/,"",v);   sub(/"?\r?$/,"",v); name=v }
+    /^status=/ { v=$0; sub(/^status="?/,"",v); sub(/"?\r?$/,"",v); st=v }
+    END        { flush() }
+  ' "$DISKSINI")"
+  bad_devs="${bad_devs% }"
+fi
+
 if [ -x "$MDCMD" ]; then
   MDST="$("$MDCMD" status 2>/dev/null)"
   md() { printf '%s\n' "$MDST" | grep -m1 "^$1=" | cut -d= -f2 | tr -d '\r'; }
   mdState="$(md mdState)"
   nDis="$(md mdNumDisabled)"; nInv="$(md mdNumInvalid)"; nMis="$(md mdNumMissing)"
   nDis=${nDis:-0}; nInv=${nInv:-0}; nMis=${nMis:-0}
-  if [ "$mdState" = "STARTED" ] && [ "$nDis" -eq 0 ] && [ "$nInv" -eq 0 ] && [ "$nMis" -eq 0 ]; then
-    add critical array_state pass "Array started and healthy (no disabled/invalid/missing disks)."
+  if [ "$mdState" = "STARTED" ] && [ "$nDis" -eq 0 ] && [ "$nInv" -eq 0 ] && [ "$nMis" -eq 0 ] && [ -z "$bad_devs" ]; then
+    add critical array_state pass "Array started and healthy; all device assignments OK."
   else
-    add critical array_state fail "Array not clean: state=${mdState:-unknown} disabled=$nDis invalid=$nInv missing=$nMis."
+    detail="$bad_devs"
+    [ -z "$detail" ] && detail="disabled=$nDis invalid=$nInv missing=$nMis"
+    add critical array_state fail "Array not clean: state=${mdState:-unknown} -- $detail"
   fi
   mdResync="$(md mdResync)"; mdResync=${mdResync:-0}
   mdAction="$(md mdResyncAction)"
@@ -88,6 +106,8 @@ if [ -x "$MDCMD" ]; then
   else
     add critical array_op pass "No parity/sync/rebuild/clear in progress."
   fi
+elif [ -n "$bad_devs" ]; then
+  add critical array_state fail "Unhealthy device assignment(s): $bad_devs"
 else
   add critical array_state info "mdcmd not found -- cannot determine array state."
 fi
