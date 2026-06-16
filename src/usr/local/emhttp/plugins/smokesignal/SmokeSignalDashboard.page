@@ -3,4 +3,4 @@ Title="SmokeSignal"
 Icon="smokesignal.png"
 ---
 <div id="ss-dash-frag" style="display:none"></div>
-<script src="/plugins/smokesignal/smokesignal.js"></script>
+<script src="/plugins/smokesignal/smokesignal.js?v=<?=@filemtime('/usr/local/emhttp/plugins/smokesignal/smokesignal.js')?>"></script>

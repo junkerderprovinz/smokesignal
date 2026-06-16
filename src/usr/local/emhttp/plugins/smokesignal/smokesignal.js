@@ -11,6 +11,7 @@
       hc: 'pre-reboot health check',
       running: 'Running checks…',
       subtitle: 'Advisory only · nothing was changed',
+      v_GO: 'GO', v_CAUTION: 'CAUTION', 'v_NO-GO': 'NO-GO',
       tier_critical: 'Critical', tier_warning: 'Caution', tier_info: 'Info',
       err: 'Could not run the check engine.',
       foot: 'SmokeSignal reads the current state and predicts the common reboot landmines (pinned mounts, stuck loops, unclean array, in-flight operations, a crash-looping box). It is an early warning, not a guarantee — genuine hardware, BIOS or timing failures during boot cannot be seen from a running system.',
@@ -71,6 +72,7 @@
       hc: 'Pre-Reboot-Gesundheitscheck',
       running: 'Prüfe…',
       subtitle: 'Nur Hinweis · es wurde nichts verändert',
+      v_GO: 'GO', v_CAUTION: 'VORSICHT', 'v_NO-GO': 'NO-GO',
       tier_critical: 'Kritisch', tier_warning: 'Achtung', tier_info: 'Info',
       err: 'Die Prüf-Engine konnte nicht ausgeführt werden.',
       foot: 'SmokeSignal liest den aktuellen Zustand und erkennt die häufigen Neustart-Stolperfallen (gepinnte Mounts, hängende Loops, unsauberes Array, laufende Operationen, eine abstürzende Box). Es ist eine Frühwarnung, keine Garantie — echte Hardware-, BIOS- oder Timing-Fehler beim Booten sind vom laufenden System nicht sichtbar.',
@@ -191,7 +193,7 @@
 
     var h = '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:14px;background:'+c.bg+';color:'+c.fg+';padding:18px 22px">';
     h += '<div style="display:flex;align-items:center;gap:14px;border-radius:10px;padding:16px 20px;background:'+c.panel+';border-left:8px solid '+vcol+'">';
-    h += '<div style="font-size:30px;font-weight:800;letter-spacing:1px;color:'+vcol+'">'+esc(data.verdict)+'</div>';
+    h += '<div style="font-size:30px;font-weight:800;letter-spacing:1px;color:'+vcol+'">'+esc(ssT(loc,'v_'+data.verdict) || data.verdict)+'</div>';
     h += '<div><div>SmokeSignal &mdash; '+esc(ssT(loc,'hc'))+'</div><div style="color:'+c.muted+';font-size:12px">'+esc(ssT(loc,'subtitle'))+(data.generated?' &middot; '+esc(data.generated):'')+'</div></div></div>';
 
     var checks = data.checks || [];
