@@ -1,14 +1,15 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "smokesignal">
+<!ENTITY name      "SmokeSignal">
+<!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "2026.06.16">
+<!ENTITY version   "2026.06.16.1">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
-<!ENTITY pkgURL    "https://github.com/junkerderprovinz/smokesignal/releases/download/v&version;/smokesignal-&version;.txz">
-<!ENTITY emhttp    "/usr/local/emhttp/plugins/&name;">
-<!ENTITY plgPath   "/boot/config/plugins/&name;">
+<!ENTITY pkgURL    "https://github.com/junkerderprovinz/smokesignal/releases/download/v&version;/&pkg;-&version;.txz">
+<!ENTITY emhttp    "/usr/local/emhttp/plugins/&pkg;">
+<!ENTITY plgPath   "/boot/config/plugins/&pkg;">
 ]>
 
 <PLUGIN name="&name;"
@@ -21,19 +22,21 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 2026.06.16.1
+- Report window now follows the configured Unraid light/dark theme (own modal, no light frame).
+- Plugin display name is "SmokeSignal"; added a Tools page with a short description.
+
 ## 2026.06.16
-- Array check now lists the exact unhealthy device assignments (disk/parity/cache + status), not just counts.
-- Report window follows the configured Unraid light/dark theme.
+- Array check lists the exact unhealthy device assignments (disk/parity/cache + status), not just counts.
 - Main tab: only the button next to Reboot now — no separate section.
 
 ## 2026.06.15
 - Initial release. Pre-reboot health check with a single verdict: GO / CAUTION / NO-GO.
-- Adds a button to the Main tab (next to Reboot).
 - Advisory only: reads the host state, never changes anything.
   </CHANGES>
 
   <!-- Download the package from the GitHub release -->
-  <FILE Name="&plgPath;/smokesignal-&version;.txz">
+  <FILE Name="&plgPath;/&pkg;-&version;.txz">
     <URL>&pkgURL;</URL>
   </FILE>
 
@@ -41,18 +44,18 @@
   <FILE Run="/bin/bash">
     <INLINE>
       echo "Installing SmokeSignal &version; ..."
-      upgradepkg --install-new --reinstall "&plgPath;/smokesignal-&version;.txz"
+      upgradepkg --install-new --reinstall "&plgPath;/&pkg;-&version;.txz"
       # Enforce the exec bit on the engine (NTFS/CI builds can drop it)
-      chmod +x "&emhttp;/smokesignal-check.sh" 2>/dev/null
+      chmod +x "&emhttp;/&pkg;-check.sh" 2>/dev/null
       echo ""
-      echo "SmokeSignal &version; installed. Open the Main tab and click 'SmokeSignal: Check now'."
+      echo "SmokeSignal &version; installed. The button sits next to Reboot on the Main tab; details under Tools > SmokeSignal."
     </INLINE>
   </FILE>
 
   <!-- Remove -->
   <REMOVE>
     <INLINE>
-      removepkg "&name;" 2>/dev/null
+      removepkg "&pkg;" 2>/dev/null
       rm -rf "&emhttp;"
       rm -rf "&plgPath;"
       echo "SmokeSignal removed."

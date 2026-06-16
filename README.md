@@ -44,7 +44,7 @@ A reboot is never 100% guaranteed, but a large class of "it didn't come back rig
 
 It is **advisory only**. It reads the system and reports. It never stops, mounts, unmounts, or changes anything — because acting on the host is exactly what tends to cause reboot trouble in the first place.
 
-The plugin adds a **"SmokeSignal: Check now"** button to the **Main** tab (next to *Reboot* where the layout allows). Click it, read the verdict, then reboot with confidence.
+The plugin adds a **SmokeSignal** button next to *Reboot* on the **Main** tab, plus a **Tools → SmokeSignal** page with a short description. Click it, read the verdict, then reboot with confidence. The report window follows your Unraid light/dark theme.
 
 <br>
 
