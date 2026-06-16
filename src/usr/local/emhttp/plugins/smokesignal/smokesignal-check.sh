@@ -10,19 +10,18 @@
 # It NEVER changes the system. Run it before a planned reboot.
 #
 # Usage:
-#   smokesignal-check.sh            human-readable report (colour when on a TTY)
+#   smokesignal-check.sh            human-readable report (English, colour on TTY)
 #   smokesignal-check.sh --json     machine-readable JSON (consumed by the WebGUI)
 #
-# Exit code mirrors the verdict: 0 = GO, 1 = CAUTION, 2 = NO-GO.
+# Each JSON finding carries a translation "key" + "args" (the WebGUI localises
+# them, falling back to the English "message"). Exit code mirrors the verdict:
+# 0 = GO, 1 = CAUTION, 2 = NO-GO.
 #
 set -u
 
 JSON=0
 [ "${1:-}" = "--json" ] && JSON=1
 
-# ---- result collection -------------------------------------------------------
-# tier:   critical | warning | info
-# status: pass | warn | fail | info
 WORST=0          # 0 GO, 1 CAUTION, 2 NO-GO
 JSON_ITEMS=""
 TXT_CRIT=""
@@ -39,14 +38,28 @@ json_escape() {
   printf '%s' "$s"
 }
 
+# add <tier> <id> <status> <key> <args(pipe-delimited)> <english-message>
 add() {
-  local tier="$1" id="$2" status="$3" msg="$4"
+  local tier="$1" id="$2" status="$3" key="$4" args="$5" msg="$6"
   case "$status" in
     fail) [ "$WORST" -lt 2 ] && WORST=2 ;;
     warn) [ "$WORST" -lt 1 ] && WORST=1 ;;
   esac
-  local j="{\"tier\":\"$tier\",\"id\":\"$id\",\"status\":\"$status\",\"message\":\"$(json_escape "$msg")\"}"
+
+  local argsjson=""
+  if [ -n "$args" ]; then
+    local oldifs="$IFS"; IFS='|'; set -f
+    local a first=1
+    for a in $args; do
+      if [ "$first" -eq 1 ]; then argsjson="\"$(json_escape "$a")\""; first=0
+      else argsjson="$argsjson,\"$(json_escape "$a")\""; fi
+    done
+    set +f; IFS="$oldifs"
+  fi
+
+  local j="{\"tier\":\"$tier\",\"id\":\"$id\",\"status\":\"$status\",\"key\":\"$key\",\"args\":[$argsjson],\"message\":\"$(json_escape "$msg")\"}"
   if [ -z "$JSON_ITEMS" ]; then JSON_ITEMS="$j"; else JSON_ITEMS="$JSON_ITEMS,$j"; fi
+
   local mark
   case "$status" in
     pass) mark="[ OK ]" ;;
@@ -72,8 +85,6 @@ have() { command -v "$1" >/dev/null 2>&1; }
 MDCMD=/usr/local/sbin/mdcmd
 DISKSINI=/var/local/emhttp/disks.ini
 
-# Walk every assigned slot (array data, parity, cache pools) and collect any
-# device whose status is not OK -- skipping genuinely empty slots (DISK_NP).
 bad_devs=""
 if [ -r "$DISKSINI" ]; then
   bad_devs="$(awk '
@@ -93,30 +104,30 @@ if [ -x "$MDCMD" ]; then
   nDis="$(md mdNumDisabled)"; nInv="$(md mdNumInvalid)"; nMis="$(md mdNumMissing)"
   nDis=${nDis:-0}; nInv=${nInv:-0}; nMis=${nMis:-0}
   if [ "$mdState" = "STARTED" ] && [ "$nDis" -eq 0 ] && [ "$nInv" -eq 0 ] && [ "$nMis" -eq 0 ] && [ -z "$bad_devs" ]; then
-    add critical array_state pass "Array started and healthy; all device assignments OK."
+    add critical array_state pass array_ok "" "Array started and healthy; all device assignments OK."
+  elif [ -n "$bad_devs" ]; then
+    add critical array_state fail array_bad_devices "${mdState:-unknown}|$bad_devs" "Array not clean: state=${mdState:-unknown} -- $bad_devs"
   else
-    detail="$bad_devs"
-    [ -z "$detail" ] && detail="disabled=$nDis invalid=$nInv missing=$nMis"
-    add critical array_state fail "Array not clean: state=${mdState:-unknown} -- $detail"
+    add critical array_state fail array_counts "${mdState:-unknown}|$nDis|$nInv|$nMis" "Array not clean: state=${mdState:-unknown} -- disabled=$nDis invalid=$nInv missing=$nMis"
   fi
   mdResync="$(md mdResync)"; mdResync=${mdResync:-0}
   mdAction="$(md mdResyncAction)"
   if [ "$mdResync" != "0" ]; then
-    add critical array_op fail "Array operation in progress (${mdAction:-sync}) -- let it finish before rebooting."
+    add critical array_op fail array_op_running "${mdAction:-sync}" "Array operation in progress (${mdAction:-sync}) -- let it finish before rebooting."
   else
-    add critical array_op pass "No parity/sync/rebuild/clear in progress."
+    add critical array_op pass array_op_ok "" "No parity/sync/rebuild/clear in progress."
   fi
 elif [ -n "$bad_devs" ]; then
-  add critical array_state fail "Unhealthy device assignment(s): $bad_devs"
+  add critical array_state fail array_bad_devices_only "$bad_devs" "Unhealthy device assignment(s): $bad_devs"
 else
-  add critical array_state info "mdcmd not found -- cannot determine array state."
+  add critical array_state info array_unknown "" "mdcmd not found -- cannot determine array state."
 fi
 
 # ---- Mover -------------------------------------------------------------------
 if pgrep -f '/usr/local/sbin/mover' >/dev/null 2>&1 || pgrep -x move >/dev/null 2>&1; then
-  add critical mover fail "Mover is running -- wait for it to finish before rebooting."
+  add critical mover fail mover_running "" "Mover is running -- wait for it to finish before rebooting."
 else
-  add critical mover pass "Mover is not running."
+  add critical mover pass mover_ok "" "Mover is not running."
 fi
 
 # ---- Containers mounting a host runtime dir (the libvirt-mount-race class) ---
@@ -127,18 +138,19 @@ if have docker && docker info >/dev/null 2>&1; then
     while IFS= read -r src; do
       [ -z "$src" ] && continue
       case "$src" in
-        /var/run/docker.sock|/run/docker.sock) ;;          # normal, allowed
+        /var/run/docker.sock|/run/docker.sock) ;;
         /var/run|/var/run/*|/run|/run/*) risky="$risky $cname:$src" ;;
       esac
     done < <(docker inspect -f '{{range .Mounts}}{{println .Source}}{{end}}' "$cid" 2>/dev/null)
   done
+  risky="${risky//|/ }"
   if [ -n "$risky" ]; then
-    add critical risky_mount fail "Container(s) mount a host runtime dir (can break libvirt/docker on reboot):$risky"
+    add critical risky_mount fail risky_mount_found "$risky" "Container(s) mount a host runtime dir (can break libvirt/docker on reboot):$risky"
   else
-    add critical risky_mount pass "No container mounts a host runtime directory (besides docker.sock)."
+    add critical risky_mount pass risky_mount_ok "" "No container mounts a host runtime directory (besides docker.sock)."
   fi
 else
-  add critical risky_mount info "Docker not available -- skipped container mount scan."
+  add critical risky_mount info risky_mount_skip "" "Docker not available -- skipped container mount scan."
 fi
 
 # ---- Stuck docker.img / libvirt.img loops -----------------------------------
@@ -152,13 +164,14 @@ if have losetup; then
   if printf '%s\n' "$LOOP" | grep -q 'libvirt.img'; then
     mountpoint -q /etc/libvirt || problem="$problem; libvirt.img is attached to a loop but /etc/libvirt is not mounted"
   fi
+  problem="${problem//|/ }"
   if [ -n "$problem" ]; then
-    add critical stuck_loop fail "Stuck image/loop state${problem}."
+    add critical stuck_loop fail stuck_loop_found "$problem" "Stuck image/loop state${problem}."
   else
-    add critical stuck_loop pass "docker.img / libvirt.img loop state looks clean."
+    add critical stuck_loop pass stuck_loop_ok "" "docker.img / libvirt.img loop state looks clean."
   fi
 else
-  add critical stuck_loop info "losetup not found -- skipped loop-device check."
+  add critical stuck_loop info stuck_loop_skip "" "losetup not found -- skipped loop-device check."
 fi
 
 # ---- Flash (USB boot) -------------------------------------------------------
@@ -166,12 +179,12 @@ if mountpoint -q /boot; then
   tf="/boot/.smokesignal_write_test.$$"
   if ( : > "$tf" ) 2>/dev/null; then
     rm -f "$tf" 2>/dev/null
-    add critical flash pass "Flash /boot is mounted and writable."
+    add critical flash pass flash_ok "" "Flash /boot is mounted and writable."
   else
-    add critical flash fail "Flash /boot is mounted but NOT writable (possible FAT corruption) -- config won't persist."
+    add critical flash fail flash_ro "" "Flash /boot is mounted but NOT writable (possible FAT corruption) -- config won't persist."
   fi
 else
-  add critical flash fail "Flash /boot is not mounted."
+  add critical flash fail flash_unmounted "" "Flash /boot is not mounted."
 fi
 
 # =============================================================================
@@ -185,12 +198,13 @@ if [ -r "$SYSLOG" ]; then
   n="$(grep -aiE "$pat" "$SYSLOG" 2>/dev/null | wc -l | tr -d ' ')"
   if [ "${n:-0}" -gt 0 ]; then
     last="$(grep -aiE "$pat" "$SYSLOG" 2>/dev/null | tail -n1 | cut -c1-160)"
-    add warning syslog warn "$n crash/instability line(s) in syslog since boot. Latest: ${last}"
+    last="${last//|/ }"
+    add warning syslog warn syslog_crashes "$n|$last" "$n crash/instability line(s) in syslog since boot. Latest: ${last}"
   else
-    add warning syslog pass "No crashes/OOM/segfaults in syslog since boot."
+    add warning syslog pass syslog_ok "" "No crashes/OOM/segfaults in syslog since boot."
   fi
 else
-  add warning syslog info "syslog not readable -- skipped crash scan."
+  add warning syslog info syslog_skip "" "syslog not readable -- skipped crash scan."
 fi
 
 # ---- Free space -------------------------------------------------------------
@@ -200,9 +214,9 @@ chk_space() {
   use="$(df -P "$path" 2>/dev/null | awk 'NR==2{gsub("%","",$5);print $5}')"
   [ -z "$use" ] && return 0
   if [ "$use" -ge "$thr" ]; then
-    add warning "space_$label" warn "$label is ${use}% full (>=${thr}%)."
+    add warning "space_$label" warn space_full "$label|$use|$thr" "$label is ${use}% full (>=${thr}%)."
   else
-    add warning "space_$label" pass "$label at ${use}% used."
+    add warning "space_$label" pass space_ok "$label|$use" "$label at ${use}% used."
   fi
 }
 chk_space /                rootfs 90
@@ -214,31 +228,31 @@ chk_space /var/lib/docker  docker 85
 if have virsh; then
   running="$(virsh list --state-running --name 2>/dev/null | grep -c .)"
   if [ "${running:-0}" -gt 0 ]; then
-    add warning vms warn "$running VM(s) running -- shut them down gracefully before rebooting."
+    add warning vms warn vms_running "$running" "$running VM(s) running -- shut them down gracefully before rebooting."
   else
-    add warning vms pass "No VMs running."
+    add warning vms pass vms_ok "" "No VMs running."
   fi
 fi
 
 # ---- Core services ----------------------------------------------------------
 if mountpoint -q /var/lib/docker; then
   if pgrep -x dockerd >/dev/null 2>&1; then
-    add warning svc_docker pass "dockerd running."
+    add warning svc_docker pass svc_docker_ok "" "dockerd running."
   else
-    add warning svc_docker warn "Docker storage mounted but dockerd is not running."
+    add warning svc_docker warn svc_docker_down "" "Docker storage mounted but dockerd is not running."
   fi
 fi
 if mountpoint -q /etc/libvirt; then
   if pgrep -x libvirtd >/dev/null 2>&1; then
-    add warning svc_libvirt pass "libvirtd running."
+    add warning svc_libvirt pass svc_libvirt_ok "" "libvirtd running."
   else
-    add warning svc_libvirt warn "libvirt enabled but libvirtd is not running."
+    add warning svc_libvirt warn svc_libvirt_down "" "libvirt enabled but libvirtd is not running."
   fi
 fi
 if pgrep -x emhttpd >/dev/null 2>&1; then
-  add warning svc_emhttp pass "emhttpd (WebGUI) running."
+  add warning svc_emhttp pass svc_emhttp_ok "" "emhttpd (WebGUI) running."
 else
-  add warning svc_emhttp warn "emhttpd (WebGUI) is not running."
+  add warning svc_emhttp warn svc_emhttp_down "" "emhttpd (WebGUI) is not running."
 fi
 
 # ---- Container bind sources exist ------------------------------------------
@@ -252,10 +266,11 @@ if have docker && docker info >/dev/null 2>&1; then
       esac
     done < <(docker inspect -f '{{range .Mounts}}{{println .Source}}{{end}}' "$cid" 2>/dev/null)
   done
+  missing="${missing//|/ }"
   if [ -n "$missing" ]; then
-    add warning binds warn "Container bind source(s) missing (won't start cleanly after reboot):$missing"
+    add warning binds warn binds_missing "$missing" "Container bind source(s) missing (won't start cleanly after reboot):$missing"
   else
-    add warning binds pass "All container bind sources under /mnt exist."
+    add warning binds pass binds_ok "" "All container bind sources under /mnt exist."
   fi
 fi
 
@@ -281,25 +296,27 @@ if have smartctl; then
       bad="$bad $dev"
     fi
   done
+  bad="${bad//|/ }"
   if [ -n "$bad" ]; then
-    add warning smart warn "SMART health FAILING on:$bad -- investigate before rebooting."
+    add warning smart warn smart_failing "$bad" "SMART health FAILING on:$bad -- investigate before rebooting."
   elif [ "$checked" -gt 0 ]; then
-    add warning smart pass "SMART health PASSED on $checked disk(s)."
+    add warning smart pass smart_ok "$checked" "SMART health PASSED on $checked disk(s)."
   else
-    add warning smart info "No disks found for SMART check."
+    add warning smart info smart_none "" "No disks found for SMART check."
   fi
 else
-  add warning smart info "smartctl not found -- skipped SMART check."
+  add warning smart info smart_skip "" "smartctl not found -- skipped SMART check."
 fi
 
 # =============================================================================
 #  INFO
 # =============================================================================
 up="$(uptime -p 2>/dev/null | sed 's/^up //')"
-[ -n "$up" ] && add info uptime info "Uptime: $up"
-add info kernel info "Kernel: $(uname -r 2>/dev/null)"
+[ -n "$up" ] && add info uptime info info_uptime "$up" "Uptime: $up"
+kr="$(uname -r 2>/dev/null)"
+add info kernel info info_kernel "$kr" "Kernel: $kr"
 ver="$(cut -d'"' -f2 /etc/unraid-version 2>/dev/null)"
-[ -n "$ver" ] && add info unraid info "Unraid version: $ver"
+[ -n "$ver" ] && add info unraid info info_unraid "$ver" "Unraid version: $ver"
 
 # =============================================================================
 #  Verdict + output

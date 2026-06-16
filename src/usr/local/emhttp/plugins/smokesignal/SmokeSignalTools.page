@@ -2,24 +2,5 @@ Menu="Utilities"
 Title="SmokeSignal"
 Icon="smokesignal.png"
 ---
-<style>
- .ss-util{max-width:780px;line-height:1.55}
- .ss-util .lead{margin:6px 0 14px}
- .ss-util ul{margin:6px 0 16px 18px}
-</style>
-
-<div class="ss-util">
-  <p class="lead"><b>SmokeSignal</b> checks whether your server will come back up clean <b>before</b> you reboot, and gives one verdict &mdash; <b>GO / CAUTION / NO-GO</b> &mdash; with the exact findings. It is <b>advisory only</b>: it reads the host and reports, it never changes anything.</p>
-
-  <p>It looks for the reboot landmines that are detectable from the running system:</p>
-  <ul>
-    <li>Array started &amp; clean &mdash; every device assignment OK (no disabled/invalid/missing disk)</li>
-    <li>No parity/sync/rebuild/clear or mover in progress</li>
-    <li>No container mounting a host runtime dir, no stuck docker.img/libvirt.img loop</li>
-    <li>Flash writable, free space, recent crashes, running VMs, services, SMART health</li>
-  </ul>
-
-  <input type="button" value="Run pre-reboot check" onclick="smokesignalRun()">
-</div>
-
+<div id="ss-tools" style="max-width:780px;line-height:1.55"></div>
 <script src="/plugins/smokesignal/smokesignal.js"></script>
