@@ -292,19 +292,21 @@
       });
     } catch(e) {}
 
-    // Dashboard: hide our own (otherwise empty) dashboard tile
+    // Dashboard: hide our own (otherwise empty) dashboard tile. Climb to the
+    // largest ancestor whose ONLY text is our title ("SmokeSignal") and hide it
+    // (control icons carry no text, so our tile's textContent is just the title).
     try {
       var dfrag = document.getElementById('ss-dash-frag');
       if (dfrag) {
-        var node = dfrag, hidden = false, h2 = 0;
-        while (node && node.parentElement && h2 < 6) {
-          var par = node.parentElement, t = (par.textContent || '').trim();
-          if (/^smokesignal$/i.test(t) && !par.querySelector('input,button,select,a[onclick]')) {
-            par.style.display = 'none'; hidden = true; break;
-          }
-          node = par; h2++;
+        var el = dfrag, tile = null, h2 = 0;
+        while (el.parentElement && h2 < 10) {
+          el = el.parentElement;
+          var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+          if (/^smokesignal$/i.test(t)) tile = el;   // still just our tile
+          else if (tile) break;                       // climbed into the grid -> stop
+          h2++;
         }
-        if (!hidden) dfrag.style.display = 'none';
+        (tile || dfrag).style.display = 'none';
       }
     } catch(e) {}
   });

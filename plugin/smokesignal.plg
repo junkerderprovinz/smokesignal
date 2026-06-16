@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "2026.06.16.5">
+<!ENTITY version   "2026.06.17">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -22,6 +22,10 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 2026.06.17
+- New logo (flame in a hazard diamond) — icon and banner regenerated from it.
+- Dashboard: removed the empty SmokeSignal tile/bar (only the icon next to Reboot remains).
+
 ## 2026.06.16.5
 - The verdict is now localised too (CAUTION → VORSICHT in German).
 - Cache-bust the WebGUI script so a plugin update always loads the latest strings (fixes a few lines staying English after an update).

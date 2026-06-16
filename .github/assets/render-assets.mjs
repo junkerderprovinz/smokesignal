@@ -7,7 +7,7 @@ const { Resvg } = require('@resvg/resvg-js');
 const here = (p) => new URL(p, import.meta.url);
 
 // ---- 1) icon.png ------------------------------------------------------------
-const iconSvg = readFileSync(here('./icon.svg'));
+const iconSvg = readFileSync(here('./logo.svg'));
 const iconPng = new Resvg(iconSvg, {
   fitTo: { mode: 'width', value: 512 },
   background: 'rgba(0,0,0,0)',
