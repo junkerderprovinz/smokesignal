@@ -85,16 +85,28 @@ have() { command -v "$1" >/dev/null 2>&1; }
 MDCMD=/usr/local/sbin/mdcmd
 DISKSINI=/var/local/emhttp/disks.ini
 
-bad_devs=""
+# Collect assigned slots whose status is not OK. Only slots that ACTUALLY have a
+# disk assigned (non-empty id) count -- an empty/never-used slot (e.g. an unused
+# second parity) reports as not-present and must NOT be flagged. Parity issues are
+# split out: a degraded parity is a caution, the array still boots.
+DISKS_READ=0; bad_data=""; bad_parity=""
 if [ -r "$DISKSINI" ]; then
+  DISKS_READ=1
   bad_devs="$(awk '
-    function flush(){ if (name!="" && st!="" && st!="DISK_OK" && st!="DISK_NP") printf "%s=%s ", name, st }
-    /^\[/      { flush(); name=""; st="" }
+    function flush(){ if (name!="" && st!="" && st!="DISK_OK" && st!="DISK_NP" && id!="") printf "%s=%s ", name, st }
+    /^\[/      { flush(); name=""; st=""; id="" }
     /^name=/   { v=$0; sub(/^name="?/,"",v);   sub(/"?\r?$/,"",v); name=v }
     /^status=/ { v=$0; sub(/^status="?/,"",v); sub(/"?\r?$/,"",v); st=v }
+    /^id=/     { v=$0; sub(/^id="?/,"",v);     sub(/"?\r?$/,"",v); id=v }
     END        { flush() }
   ' "$DISKSINI")"
-  bad_devs="${bad_devs% }"
+  for d in $bad_devs; do
+    case "$d" in
+      parity*) bad_parity="$bad_parity $d" ;;
+      *)       bad_data="$bad_data $d" ;;
+    esac
+  done
+  bad_data="${bad_data# }"; bad_parity="${bad_parity# }"
 fi
 
 if [ -x "$MDCMD" ]; then
@@ -103,13 +115,21 @@ if [ -x "$MDCMD" ]; then
   mdState="$(md mdState)"
   nDis="$(md mdNumDisabled)"; nInv="$(md mdNumInvalid)"; nMis="$(md mdNumMissing)"
   nDis=${nDis:-0}; nInv=${nInv:-0}; nMis=${nMis:-0}
-  if [ "$mdState" = "STARTED" ] && [ "$nDis" -eq 0 ] && [ "$nInv" -eq 0 ] && [ "$nMis" -eq 0 ] && [ -z "$bad_devs" ]; then
-    add critical array_state pass array_ok "" "Array started and healthy; all device assignments OK."
-  elif [ -n "$bad_devs" ]; then
-    add critical array_state fail array_bad_devices "${mdState:-unknown}|$bad_devs" "Array not clean: state=${mdState:-unknown} -- $bad_devs"
+  if [ "$mdState" != "STARTED" ]; then
+    add critical array_state fail array_not_started "${mdState:-unknown}" "Array is not started (state=${mdState:-unknown})."
+  elif [ "$DISKS_READ" -eq 1 ]; then
+    if [ -n "$bad_data" ]; then
+      add critical array_state fail array_bad_devices "$bad_data" "Array not clean -- unhealthy data disk(s): $bad_data"
+    else
+      add critical array_state pass array_ok "" "Array started and healthy; all data disk assignments OK."
+    fi
+  elif [ "$nDis" -ne 0 ] || [ "$nInv" -ne 0 ] || [ "$nMis" -ne 0 ]; then
+    add critical array_state fail array_counts "${mdState}|$nDis|$nInv|$nMis" "Array not clean: state=${mdState} -- disabled=$nDis invalid=$nInv missing=$nMis"
   else
-    add critical array_state fail array_counts "${mdState:-unknown}|$nDis|$nInv|$nMis" "Array not clean: state=${mdState:-unknown} -- disabled=$nDis invalid=$nInv missing=$nMis"
+    add critical array_state pass array_ok "" "Array started and healthy; all device assignments OK."
   fi
+  [ -n "$bad_parity" ] && add warning array_parity warn array_parity_degraded "$bad_parity" "Parity disk disabled/missing: $bad_parity -- array still boots, parity protection reduced."
+
   mdResync="$(md mdResync)"; mdResync=${mdResync:-0}
   mdAction="$(md mdResyncAction)"
   if [ "$mdResync" != "0" ]; then
@@ -117,8 +137,11 @@ if [ -x "$MDCMD" ]; then
   else
     add critical array_op pass array_op_ok "" "No parity/sync/rebuild/clear in progress."
   fi
-elif [ -n "$bad_devs" ]; then
-  add critical array_state fail array_bad_devices_only "$bad_devs" "Unhealthy device assignment(s): $bad_devs"
+elif [ -n "$bad_data" ]; then
+  add critical array_state fail array_bad_devices "$bad_data" "Array not clean -- unhealthy data disk(s): $bad_data"
+  [ -n "$bad_parity" ] && add warning array_parity warn array_parity_degraded "$bad_parity" "Parity disk disabled/missing: $bad_parity -- array still boots, parity protection reduced."
+elif [ -n "$bad_parity" ]; then
+  add warning array_parity warn array_parity_degraded "$bad_parity" "Parity disk disabled/missing: $bad_parity -- array still boots, parity protection reduced."
 else
   add critical array_state info array_unknown "" "mdcmd not found -- cannot determine array state."
 fi
@@ -203,6 +226,17 @@ if [ -r "$SYSLOG" ]; then
   else
     add warning syslog pass syslog_ok "" "No crashes/OOM/segfaults in syslog since boot."
   fi
+
+  # disk / I/O hardware errors (failing disk or loose cable)
+  iopat='blk_update_request: I/O error|I/O error, dev |ata[0-9]+\.[0-9]+: (failed command|exception)|hard resetting link|medium error|Medium Error|task abort|SCSI error|Buffer I/O error'
+  ni="$(grep -aiE "$iopat" "$SYSLOG" 2>/dev/null | wc -l | tr -d ' ')"
+  if [ "${ni:-0}" -gt 0 ]; then
+    lasti="$(grep -aiE "$iopat" "$SYSLOG" 2>/dev/null | tail -n1 | cut -c1-160)"
+    lasti="${lasti//|/ }"
+    add warning iodisk warn io_errors "$ni|$lasti" "$ni disk/IO error line(s) in syslog since boot. Latest: ${lasti}"
+  else
+    add warning iodisk pass io_ok "" "No disk/IO errors in syslog since boot."
+  fi
 else
   add warning syslog info syslog_skip "" "syslog not readable -- skipped crash scan."
 fi
@@ -283,20 +317,32 @@ if have smartctl; then
   if [ -z "$devs" ] && have lsblk; then
     devs="$(lsblk -dno NAME -e7,11 2>/dev/null)"
   fi
-  bad=""; checked=0
+  TEMP_MAX=55
+  bad=""; attrwarn=""; checked=0
   for d in $devs; do
     [ -z "$d" ] && continue
     dev="/dev/$d"; [ -b "$dev" ] || dev="$d"
     [ -b "$dev" ] || continue
     checked=$((checked+1))
     out="$(smartctl -H "$dev" 2>/dev/null)"
-    if printf '%s' "$out" | grep -qiE 'PASSED|: OK'; then
-      :
-    elif printf '%s' "$out" | grep -qiE 'FAILED|FAILING'; then
+    if printf '%s' "$out" | grep -qiE 'FAILED|FAILING'; then
       bad="$bad $dev"
     fi
+    # attribute-level early warning (SATA table; best-effort)
+    A="$(smartctl -A "$dev" 2>/dev/null)"
+    araw() { printf '%s\n' "$A" | awk -v n="$1" '$2==n{v=$10} END{print v+0}'; }
+    re="$(araw Reallocated_Sector_Ct)"; pe="$(araw Current_Pending_Sector)"
+    un="$(araw Offline_Uncorrectable)"; cr="$(araw UDMA_CRC_Error_Count)"
+    tp="$(araw Temperature_Celsius)"; [ "${tp:-0}" -eq 0 ] 2>/dev/null && tp="$(araw Airflow_Temperature_Cel)"
+    iss=""
+    [ "${re:-0}" -gt 0 ] 2>/dev/null && iss="${iss}realloc=$re "
+    [ "${pe:-0}" -gt 0 ] 2>/dev/null && iss="${iss}pending=$pe "
+    [ "${un:-0}" -gt 0 ] 2>/dev/null && iss="${iss}uncorrectable=$un "
+    [ "${cr:-0}" -gt 0 ] 2>/dev/null && iss="${iss}crc=$cr "
+    [ "${tp:-0}" -gt "$TEMP_MAX" ] 2>/dev/null && iss="${iss}temp=${tp}C "
+    [ -n "$iss" ] && attrwarn="$attrwarn ${d}:${iss% }"
   done
-  bad="${bad//|/ }"
+  bad="${bad//|/ }"; attrwarn="${attrwarn//|/ }"; attrwarn="${attrwarn# }"
   if [ -n "$bad" ]; then
     add warning smart warn smart_failing "$bad" "SMART health FAILING on:$bad -- investigate before rebooting."
   elif [ "$checked" -gt 0 ]; then
@@ -304,6 +350,7 @@ if have smartctl; then
   else
     add warning smart info smart_none "" "No disks found for SMART check."
   fi
+  [ -n "$attrwarn" ] && add warning smart_attr warn smart_attr "$attrwarn" "SMART attribute warnings: $attrwarn"
 else
   add warning smart info smart_skip "" "smartctl not found -- skipped SMART check."
 fi
