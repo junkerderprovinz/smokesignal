@@ -1,0 +1,6 @@
+Menu="Dashboard"
+Title="SmokeSignal"
+Icon="smokesignal.png"
+---
+<div id="ss-dash-frag" style="display:none"></div>
+<script src="/plugins/smokesignal/smokesignal.js"></script>

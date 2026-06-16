@@ -85,5 +85,34 @@
         frag.remove();
       }
     } catch(e) {}
+
+    // Dashboard only: add a SmokeSignal icon to the server tile's control row,
+    // right next to the Reboot icon (matches the native power-icon styling).
+    try {
+      $('.tile-ctrl').each(function(){
+        var row = $(this);
+        if (row.find('.ss-dash-icon').length) return;
+        var icon = $('<i class="fa fa-fw fa-fire hand ss-dash-icon" title="SmokeSignal — Pre-Reboot Check"></i>');
+        icon.on('click', run);
+        var reboot = row.find('[onclick*="Reboot"]').first();
+        if (reboot.length) icon.insertBefore(reboot); else row.prepend(icon);
+      });
+    } catch(e) {}
+
+    // Dashboard only: hide our own (otherwise empty) dashboard tile.
+    try {
+      var dfrag = document.getElementById('ss-dash-frag');
+      if (dfrag) {
+        var node = dfrag, hidden = false, h = 0;
+        while (node && node.parentElement && h < 6) {
+          var par = node.parentElement, t = (par.textContent || '').trim();
+          if (/^smokesignal$/i.test(t) && !par.querySelector('input,button,select,a[onclick]')) {
+            par.style.display = 'none'; hidden = true; break;
+          }
+          node = par; h++;
+        }
+        if (!hidden) dfrag.style.display = 'none';
+      }
+    } catch(e) {}
   });
 })();

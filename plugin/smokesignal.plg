@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "2026.06.16.1">
+<!ENTITY version   "2026.06.16.2">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -22,6 +22,9 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 2026.06.16.2
+- Dashboard: adds a SmokeSignal icon to the server tile's control row, next to Reboot.
+
 ## 2026.06.16.1
 - Report window now follows the configured Unraid light/dark theme (own modal, no light frame).
 - Plugin display name is "SmokeSignal"; added a Tools page with a short description.
