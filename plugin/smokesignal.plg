@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.0">
+<!ENTITY version   "1.0.1">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -17,11 +17,15 @@
         version="&version;"
         launch="&launch;"
         pluginURL="&pluginURL;"
-        icon="fa-fire"
+        icon="fire"
         min="6.10.0"
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 1.0.1
+- Logo added to the check result window.
+- Plugins-tab icon fixed (FontAwesome "fire").
+
 ## 1.0.0
 - First stable release. Versioning switched to SemVer (vX.Y.Z) to match the container repos.
 - New logo (flame in a hazard diamond); banner headline in Bree Serif, claim in Lato.

@@ -163,6 +163,8 @@
       '#ss-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:flex-start;justify-content:center}' +
       "#ss-modal .ss-pan{margin-top:4vh;width:min(800px,94vw);max-height:88vh;display:flex;flex-direction:column;border-radius:10px;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.55)}" +
       "#ss-modal .ss-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;font-weight:700;font-family:'Segoe UI',Arial,sans-serif}" +
+      '#ss-modal .ss-htitle{display:flex;align-items:center;gap:10px}' +
+      '#ss-modal .ss-logo{height:26px;width:26px;flex:0 0 auto}' +
       '#ss-modal .ss-x{cursor:pointer;font-size:22px;line-height:1;opacity:.75}#ss-modal .ss-x:hover{opacity:1}' +
       '#ss-modal .ss-body{overflow:auto}';
     document.head.appendChild(st);
@@ -173,7 +175,7 @@
     if (mod) return mod;
     mod = document.createElement('div');
     mod.id = 'ss-modal';
-    mod.innerHTML = '<div class="ss-pan"><div class="ss-head"><span class="ss-title"></span><span class="ss-x" title="Close">&times;</span></div><div class="ss-body"></div></div>';
+    mod.innerHTML = '<div class="ss-pan"><div class="ss-head"><span class="ss-htitle"><img class="ss-logo" src="/plugins/smokesignal/smokesignal.png?v=2" alt=""><span class="ss-title"></span></span><span class="ss-x" title="Close">&times;</span></div><div class="ss-body"></div></div>';
     document.body.appendChild(mod);
     function close(){ mod.style.display = 'none'; }
     mod.addEventListener('click', function(e){ if (e.target === mod) close(); });
