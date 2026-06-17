@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "2026.06.17">
+<!ENTITY version   "1.0.0">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -22,6 +22,10 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 1.0.0
+- First stable release. Versioning switched to SemVer (vX.Y.Z) to match the container repos.
+- New logo (flame in a hazard diamond); banner headline in Bree Serif, claim in Lato.
+
 ## 2026.06.17
 - New logo (flame in a hazard diamond) — icon and banner regenerated from it.
 - Dashboard: removed the empty SmokeSignal tile/bar (only the icon next to Reboot remains).
