@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<!--
+  Unraid Community Applications support thread for SmokeSignal.
+  Structure mirrors the sister-app threads (e.g. featherdrop):
+  title -> subtitle -> banner -> buttons -> What is this? -> Highlights ->
+  Requirements -> Posting a bug report -> Credits -> disclaimer.
+  Open standalone in a browser, or paste into the Unraid forum editor's source.
+  Title: [Support] junkerderprovinz - SmokeSignal
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Support] junkerderprovinz - SmokeSignal</title>
+<style>
+  body { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem;
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         line-height: 1.6; color: #1c1c1c; }
+  h1 { text-align: center; font-size: 1.7rem; margin-bottom: .2rem; }
+  .subtitle { text-align: center; color: #666; font-style: italic; margin-top: 0; }
+  h2 { margin-top: 1.9rem; font-size: 1.25rem; }
+  code { background: #f1f1f1; padding: .1em .35em; border-radius: 4px; font-size: .9em; }
+  a { color: #e8651c; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .25rem 0; }
+  img { border: 0; vertical-align: middle; }
+  hr { border: 0; border-top: 1px solid #ddd; margin: 2rem 0; }
+  .footnote { color: #777; font-size: .9em; font-style: italic; text-align: center; margin-top: 2rem; }
+</style>
+</head>
+<body>
+
+<h1>SmokeSignal – know your Unraid will reboot clean, before you reboot</h1>
+<p class="subtitle">Catches the smoke before the reboot catches fire.</p>
+
+<p align="center">
+  <a href="https://github.com/junkerderprovinz/smokesignal">
+    <img src="https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main/.github/assets/banner.png" alt="SmokeSignal" width="100%">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://unraid.net/community/apps?q=SmokeSignal"><img src="https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main/.github/assets/support-buttons/install-on-unraid.svg" alt="Install on Unraid" width="240"></a>
+  &nbsp;
+  <a href="https://github.com/junkerderprovinz/smokesignal"><img src="https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main/.github/assets/support-buttons/view-on-github.svg" alt="View on GitHub" width="240"></a>
+  &nbsp;
+  <a href="https://buymeacoffee.com/junkerderprovinz"><img src="https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main/.github/assets/support-buttons/buy-me-a-coffee.svg" alt="Buy me a coffee" width="240"></a>
+</p>
+
+<h2>What is this?</h2>
+<p>A reboot is never 100% guaranteed — but a large class of "it didn't come back right"
+is <strong>predictable from the current state of the running system</strong>. SmokeSignal
+inspects that state <strong>before</strong> you reboot and gives you one honest verdict:
+<strong>GO / CAUTION / NO-GO</strong>, with the exact findings.</p>
+<p>It is <strong>advisory only</strong>: it reads the host and reports — it never stops,
+mounts, unmounts or changes anything (acting on the host is exactly what tends to cause
+reboot trouble in the first place). The plugin adds a <strong>"SmokeSignal: Check now"
+button next to Reboot</strong> on the Main tab and an <strong>icon on the Dashboard</strong>.
+Click, read the verdict, then reboot with confidence.</p>
+
+<h2>Highlights</h2>
+<ul>
+  <li><strong>Critical (NO-GO)</strong> — array started &amp; every device assignment OK (no disabled/invalid/missing disk); no parity/sync/rebuild/clear or mover running; no container mounting a host runtime dir (the bind class that can take libvirt/docker down on reboot); no stuck <code>docker.img</code>/<code>libvirt.img</code> loop; flash writable</li>
+  <li><strong>Caution</strong> — crashes since boot in the syslog, <strong>disk/IO errors</strong> (failing disk or loose cable), low free space, running VMs, a stopped core service, missing container bind sources, and <strong>SMART health</strong> (status + attributes: reallocated/pending/uncorrectable sectors, UDMA CRC, temperature)</li>
+  <li><strong>Advisory only</strong> — reads and reports, never changes the host</li>
+  <li><strong>Follows your Unraid theme &amp; language</strong> — light/dark, English + German (English fallback for other languages)</li>
+  <li><strong>No dependencies</strong> — a small Bash engine querying the tools Unraid already ships; no daemon, nothing to configure</li>
+</ul>
+<p><em>Honest limit:</em> it is an early warning, not an oracle — genuine hardware, BIOS or
+timing failures during boot cannot be seen from a running system. What it covers reliably is
+the state-detectable class.</p>
+
+<h2>Requirements</h2>
+<ul>
+  <li>Unraid 6.10+</li>
+  <li>Nothing else — install from the Apps tab (or the <code>.plg</code> URL) and the button appears on the Main tab</li>
+</ul>
+
+<h2>Posting a bug report</h2>
+<p>Please post:</p>
+<ul>
+  <li>Unraid version (Settings → System Information)</li>
+  <li>SmokeSignal version (Plugins tab)</li>
+  <li>The verdict + the lines shown, or the console output of
+      <code>bash /usr/local/emhttp/plugins/smokesignal/smokesignal-check.sh</code></li>
+  <li>Browser + OS (for any WebGUI/display issue)</li>
+</ul>
+<p>GitHub issues with the same info are welcome:
+<a href="https://github.com/junkerderprovinz/smokesignal/issues">github.com/junkerderprovinz/smokesignal/issues</a></p>
+
+<h2>Credits</h2>
+<p>Born from the classic homelab lesson that a green build is not a booting server. The
+engine stands on the tools Unraid already ships (<code>mdcmd</code>, <code>smartctl</code>,
+<code>losetup</code>, <code>docker</code>). If SmokeSignal saves you a bad reboot, you can
+<a href="https://buymeacoffee.com/junkerderprovinz">buy me a coffee</a>.</p>
+
+<hr>
+
+<p class="footnote">Self-hosted, MIT-licensed — you run it, you own your data and the responsibility.</p>
+
+</body>
+</html>
