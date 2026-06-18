@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.3">
+<!ENTITY version   "1.0.4">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -17,11 +17,15 @@
         version="&version;"
         launch="&launch;"
         pluginURL="&pluginURL;"
-        icon="fire"
+        icon="smokesignal.png"
         min="6.10.0"
-        support="https://github.com/junkerderprovinz/smokesignal/issues">
+        support="https://forums.unraid.net/topic/199508-support-junkerderprovinz-smokesignal/">
 
   <CHANGES>
+## 1.0.4
+- Plugins tab now shows the real SmokeSignal logo (icon set to the PNG, not a generic FontAwesome glyph).
+- Support link points to the Unraid forum thread.
+
 ## 1.0.3
 - Install now wipes the plugin folder + old package entries before extracting, so files removed between versions no longer linger. Fixes the leftover empty Dashboard "SmokeSignal" bar from the v1.0.1→1.0.2 upgrade.
 
