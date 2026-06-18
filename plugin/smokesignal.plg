@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.2">
+<!ENTITY version   "1.0.3">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -22,6 +22,9 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 1.0.3
+- Install now wipes the plugin folder + old package entries before extracting, so files removed between versions no longer linger. Fixes the leftover empty Dashboard "SmokeSignal" bar from the v1.0.1→1.0.2 upgrade.
+
 ## 1.0.2
 - Removed the Dashboard tile entirely — it left an empty "SmokeSignal" bar at the bottom of the Dashboard that could not be reliably hidden. The check stays one click away via the Main-tab button (next to Reboot) and the Tools page.
 
@@ -75,7 +78,15 @@
   <FILE Run="/bin/bash">
     <INLINE>
       echo "Installing SmokeSignal &version; ..."
-      upgradepkg --install-new --reinstall "&plgPath;/&pkg;-&version;.txz"
+      # installpkg overwrites same-path files but does NOT delete files that were
+      # removed between versions (the .txz name carries the version, so each is a
+      # "new" package). Wipe any previous SmokeSignal package + the plugin dir
+      # first, so stale files (e.g. an old .page) never linger.
+      for p in /var/log/packages/&pkg;*; do
+        if [ -e "$p" ]; then removepkg "$(basename "$p")" 2>/dev/null; fi
+      done
+      rm -rf "&emhttp;"
+      installpkg "&plgPath;/&pkg;-&version;.txz"
       # Enforce the exec bit on the engine (NTFS/CI builds can drop it)
       chmod +x "&emhttp;/&pkg;-check.sh" 2>/dev/null
       echo ""
