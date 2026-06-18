@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.5">
+<!ENTITY version   "1.0.6">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -17,11 +17,13 @@
         version="&version;"
         launch="&launch;"
         pluginURL="&pluginURL;"
-        icon="smokesignal.png"
         min="6.10.0"
         support="https://forums.unraid.net/topic/199508-support-junkerderprovinz-smokesignal/">
 
   <CHANGES>
+## 1.0.6
+- Plugins-tab logo: match the established convention (FanCtrl Plus etc.) — no `icon=` in the .plg, ship the logo under images/ and icons/. Unraid auto-resolves it; the explicit icon= path didn't render on all setups.
+
 ## 1.0.5
 - Ship the icon under images/ too — Unraid's Plugins tab looks there for the logo; without it, it showed the generic plugin placeholder.
 

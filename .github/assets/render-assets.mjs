@@ -52,6 +52,8 @@ writeFileSync(here('../../src/usr/local/emhttp/plugins/smokesignal/smokesignal.p
 // (older releases ONLY there) — ship it in both places.
 mkdirSync(new URL('../../src/usr/local/emhttp/plugins/smokesignal/images/', import.meta.url), { recursive: true });
 writeFileSync(here('../../src/usr/local/emhttp/plugins/smokesignal/images/smokesignal.png'), iconPng);
+mkdirSync(new URL('../../src/usr/local/emhttp/plugins/smokesignal/icons/', import.meta.url), { recursive: true });
+writeFileSync(here('../../src/usr/local/emhttp/plugins/smokesignal/icons/smokesignal.png'), iconPng);
 
 // ---- 2) banner --------------------------------------------------------------
 const bree = await getFont('SmokeSignal-BreeSerif-Regular.ttf',
