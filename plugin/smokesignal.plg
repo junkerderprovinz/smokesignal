@@ -3,7 +3,7 @@
 <!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.8">
+<!ENTITY version   "1.0.9">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -21,6 +21,9 @@
         support="https://forums.unraid.net/topic/199508-support-junkerderprovinz-smokesignal/">
 
   <CHANGES>
+## 1.0.9
+- Logo: filled the diamond interior white so it stays clearly visible on dark backgrounds (Plugins tab, Community Apps, dashboard) as well as light.
+
 ## 1.0.8
 - Fixed an install failure: the previous changelog contained angle-bracket placeholders that broke the .plg XML parsing (plugin: xml parse error). Cleaned the changelog text.
 
