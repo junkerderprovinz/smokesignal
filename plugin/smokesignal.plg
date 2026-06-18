@@ -3,7 +3,7 @@
 <!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.7">
+<!ENTITY version   "1.0.8">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -21,8 +21,11 @@
         support="https://forums.unraid.net/topic/199508-support-junkerderprovinz-smokesignal/">
 
   <CHANGES>
+## 1.0.8
+- Fixed an install failure: the previous changelog contained angle-bracket placeholders that broke the .plg XML parsing (plugin: xml parse error). Cleaned the changelog text.
+
 ## 1.0.7
-- Real fix for the Plugins-tab logo: the plugin name was "SmokeSignal" (capitalized) but Unraid's icon() resolves the logo from plugins/<name>/images/<name>.png — case-sensitive, so it looked in plugins/SmokeSignal/ and fell back to the generic icon. Name is now "smokesignal" (matching the folder); the logo resolves.
+- Real fix for the Plugins-tab logo: the plugin name was "SmokeSignal" (capitalized) but Unraid's icon() resolves the logo from plugins/[name]/images/[name].png (case-sensitive), so it looked in plugins/SmokeSignal/ and fell back to the generic icon. The name is now lowercase "smokesignal" (matching the folder), so the logo resolves.
 
 ## 1.0.6
 - Plugins-tab logo: match the established convention (FanCtrl Plus etc.) — no `icon=` in the .plg, ship the logo under images/ and icons/. Unraid auto-resolves it; the explicit icon= path didn't render on all setups.
