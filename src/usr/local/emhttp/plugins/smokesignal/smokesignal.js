@@ -1,7 +1,7 @@
-/* SmokeSignal -- shared WebGUI helper (Main, Dashboard, Tools pages).
+/* SmokeSignal -- shared WebGUI helper (Main + Tools pages).
  * Detects the configured Unraid language, fetches the engine JSON, and renders
  * a theme-matched, localised report in its own modal. Falls back to English for
- * any language or key we don't have. Adds the Main/Dashboard buttons too.       */
+ * any language or key we don't have. Adds the Main-tab button (next to Reboot). */
 (function(){
 
   /* ---------------- translations (extend by adding a language object) -------- */
@@ -279,36 +279,6 @@
           p = prev; hops++;
         }
         frag.remove();
-      }
-    } catch(e) {}
-
-    // Dashboard: add a SmokeSignal icon to the server tile's control row, next to Reboot
-    try {
-      $('.tile-ctrl').each(function(){
-        var row = $(this);
-        if (row.find('.ss-dash-icon').length) return;
-        var icon = $('<i class="fa fa-fw fa-fire hand ss-dash-icon" title="SmokeSignal"></i>');
-        icon.on('click', run);
-        var reboot = row.find('[onclick*="Reboot"]').first();
-        if (reboot.length) icon.insertBefore(reboot); else row.prepend(icon);
-      });
-    } catch(e) {}
-
-    // Dashboard: hide our own (otherwise empty) dashboard tile. Climb to the
-    // largest ancestor whose ONLY text is our title ("SmokeSignal") and hide it
-    // (control icons carry no text, so our tile's textContent is just the title).
-    try {
-      var dfrag = document.getElementById('ss-dash-frag');
-      if (dfrag) {
-        var el = dfrag, tile = null, h2 = 0;
-        while (el.parentElement && h2 < 10) {
-          el = el.parentElement;
-          var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
-          if (/^smokesignal$/i.test(t)) tile = el;   // still just our tile
-          else if (tile) break;                       // climbed into the grid -> stop
-          h2++;
-        }
-        (tile || dfrag).style.display = 'none';
       }
     } catch(e) {}
   });

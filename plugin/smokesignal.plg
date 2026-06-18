@@ -3,7 +3,7 @@
 <!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.1">
+<!ENTITY version   "1.0.2">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -22,6 +22,9 @@
         support="https://github.com/junkerderprovinz/smokesignal/issues">
 
   <CHANGES>
+## 1.0.2
+- Removed the Dashboard tile entirely — it left an empty "SmokeSignal" bar at the bottom of the Dashboard that could not be reliably hidden. The check stays one click away via the Main-tab button (next to Reboot) and the Tools page.
+
 ## 1.0.1
 - Logo added to the check result window.
 - Plugins-tab icon fixed (FontAwesome "fire").
