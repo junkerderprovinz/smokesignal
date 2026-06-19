@@ -1,6 +1,6 @@
 Menu="Main"
 Title="SmokeSignal"
-Icon="smokesignal.png"
+Icon="fire"
 ---
 <div id="ss-frag" style="display:none"></div>
 <script src="/plugins/smokesignal/smokesignal.js?v=<?=@filemtime('/usr/local/emhttp/plugins/smokesignal/smokesignal.js')?>"></script>

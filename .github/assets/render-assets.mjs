@@ -11,7 +11,7 @@
  *
  * Run: node .github/assets/render-assets.mjs
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
@@ -47,13 +47,10 @@ async function getFont(file, url) {
 const logoSvg = readFileSync(here('./logo.svg'));
 const iconPng = new Resvg(logoSvg, { fitTo: { mode: 'width', value: 512 }, background: 'rgba(0,0,0,0)' }).render().asPng();
 writeFileSync(here('./icon.png'), iconPng);
+// Root copy is used by the check-result modal (<img>). The Plugins-tab + menu icon
+// is a theme-adaptive FontAwesome glyph (.plg/.page icon="fire"); the full-colour
+// logo lives in the CA feed <Icon> + here. No images/ or icons/ copy needed.
 writeFileSync(here('../../src/usr/local/emhttp/plugins/smokesignal/smokesignal.png'), iconPng);
-// Unraid's Plugins tab looks for the plugin icon under plugins/<name>/images/ first
-// (older releases ONLY there) — ship it in both places.
-mkdirSync(new URL('../../src/usr/local/emhttp/plugins/smokesignal/images/', import.meta.url), { recursive: true });
-writeFileSync(here('../../src/usr/local/emhttp/plugins/smokesignal/images/smokesignal.png'), iconPng);
-mkdirSync(new URL('../../src/usr/local/emhttp/plugins/smokesignal/icons/', import.meta.url), { recursive: true });
-writeFileSync(here('../../src/usr/local/emhttp/plugins/smokesignal/icons/smokesignal.png'), iconPng);
 
 // ---- 2) banner --------------------------------------------------------------
 const bree = await getFont('SmokeSignal-BreeSerif-Regular.ttf',

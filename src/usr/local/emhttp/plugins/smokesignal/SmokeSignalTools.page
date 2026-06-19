@@ -1,6 +1,6 @@
 Menu="Utilities"
 Title="SmokeSignal"
-Icon="smokesignal.png"
+Icon="fire"
 ---
 <div id="ss-tools" style="max-width:780px;line-height:1.55"></div>
 <script src="/plugins/smokesignal/smokesignal.js?v=<?=@filemtime('/usr/local/emhttp/plugins/smokesignal/smokesignal.js')?>"></script>
