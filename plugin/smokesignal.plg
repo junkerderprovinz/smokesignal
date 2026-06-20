@@ -1,9 +1,9 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "smokesignal">
+<!ENTITY name      "SmokeSignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.11">
+<!ENTITY version   "1.0.12">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -20,7 +20,18 @@
         min="6.10.0"
         support="https://forums.unraid.net/topic/199508-support-junkerderprovinz-smokesignal/">
 
+<!-- Plugins-tab logo via the ICON element + local path (name-independent, the
+     FanCtrlPlus convention) — so the name can stay "SmokeSignal". -->
+<ICON>
+/usr/local/emhttp/plugins/&pkg;/images/&pkg;.png
+</ICON>
+
   <CHANGES>
+## 1.0.12
+- Restores the "SmokeSignal" name (Plugins list + CA) while keeping the logo:
+  the logo is set via the plugin ICON element (a local path), the way FanCtrlPlus
+  does it, instead of relying on a lowercase name.
+
 ## 1.0.11
 - New logo (white-framed, reads on any background) and it's back in the Plugins tab: ship it under images/ + icons/ and drop the FontAwesome `icon=` so Unraid auto-resolves the real logo again.
 
