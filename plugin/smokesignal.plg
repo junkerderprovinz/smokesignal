@@ -3,7 +3,7 @@
 <!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.10">
+<!ENTITY version   "1.0.11">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -17,11 +17,13 @@
         version="&version;"
         launch="&launch;"
         pluginURL="&pluginURL;"
-        icon="fire"
         min="6.10.0"
         support="https://forums.unraid.net/topic/199508-support-junkerderprovinz-smokesignal/">
 
   <CHANGES>
+## 1.0.11
+- New logo (white-framed, reads on any background) and it's back in the Plugins tab: ship it under images/ + icons/ and drop the FontAwesome `icon=` so Unraid auto-resolves the real logo again.
+
 ## 1.0.10
 - Plugins tab + menu icon is now a theme-adaptive FontAwesome glyph (auto light/dark, like other plugins). The full-colour logo is kept for the Community Apps preview.
 
