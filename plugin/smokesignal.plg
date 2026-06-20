@@ -1,9 +1,9 @@
 <?xml version='1.0' standalone='yes'?>
 <!DOCTYPE PLUGIN [
-<!ENTITY name      "SmokeSignal">
+<!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.12">
+<!ENTITY version   "1.0.13">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -27,6 +27,11 @@
 </ICON>
 
   <CHANGES>
+## 1.0.13
+- Logo + name + description in the Plugins tab now all work, the FanCtrlPlus way:
+  the package ships a README.md (shows "SmokeSignal" + the description) and the
+  logo under images/, with a lowercase slug so Unraid resolves both.
+
 ## 1.0.12
 - Restores the "SmokeSignal" name (Plugins list + CA) while keeping the logo:
   the logo is set via the plugin ICON element (a local path), the way FanCtrlPlus
