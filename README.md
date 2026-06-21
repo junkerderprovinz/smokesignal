@@ -26,11 +26,12 @@ SmokeSignal reads the live host state and gives you a single verdict — <b>GO /
 ## Table of Contents
 
 1. [What is this?](#1-what-is-this)
-2. [What it checks](#2-what-it-checks)
-3. [How it works](#3-how-it-works)
-4. [Install](#4-install)
-5. [Development](#5-development)
-6. [Support this project](#6-support-this-project)
+2. [Screenshots](#2-screenshots)
+3. [What it checks](#3-what-it-checks)
+4. [How it works](#4-how-it-works)
+5. [Install](#5-install)
+6. [Development](#6-development)
+7. [Support this project](#7-support-this-project)
 
 <br>
 
@@ -48,7 +49,23 @@ The plugin adds a **SmokeSignal** button next to *Reboot* on the **Main** tab, p
 
 <br>
 
-## 2. What it checks
+## 2. Screenshots
+
+<p align="center">
+  <img src=".github/assets/screenshots/report.png" alt="SmokeSignal pre-reboot report with a CAUTION verdict" width="58%">
+  <br><em>The pre-reboot report: a single GO / CAUTION / NO-GO verdict with the exact checks behind it. Advisory only — it never changes anything.</em>
+</p>
+
+<br>
+
+<p align="center">
+  <img src=".github/assets/screenshots/main-button.png" alt="SmokeSignal button next to Reboot on the Main tab" width="90%">
+  <br><em>One click from the Main tab — the SmokeSignal button sits right next to Reboot.</em>
+</p>
+
+<br>
+
+## 3. What it checks
 
 **Critical — a failure here means NO-GO**
 
@@ -75,7 +92,7 @@ This is an early-warning check, not an oracle. Genuine hardware, BIOS or timing 
 
 <br>
 
-## 3. How it works
+## 4. How it works
 
 A single Bash engine (`smokesignal-check.sh`) runs the checks by querying the tools Unraid already ships — `mdcmd`, `losetup`, `docker`, `smartctl`, `df`, `pgrep`. No daemon, no dependencies. It prints a human-readable report on a console, or machine-readable JSON for the WebGUI:
 
@@ -90,7 +107,7 @@ The WebGUI layer is a small PHP page (`SmokeSignalReport.php`) that runs the eng
 
 <br>
 
-## 4. Install
+## 5. Install
 
 **Community Apps** *(planned)* — search for **SmokeSignal** in the Apps tab.
 
@@ -102,7 +119,7 @@ https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main/plugin/smoke
 
 <br>
 
-## 5. Development
+## 6. Development
 
 The plugin files live under [`src/`](src/) mirroring the on-disk layout
 (`/usr/local/emhttp/plugins/smokesignal/`). The release `.txz` is built by CI on
@@ -113,7 +130,7 @@ Assets (icon, banner) are generated with
 
 <br>
 
-## 6. Support this project
+## 7. Support this project
 
 If SmokeSignal saved you a bad reboot, you can
 [buy me a coffee](https://buymeacoffee.com/junkerderprovinz). Thanks!
