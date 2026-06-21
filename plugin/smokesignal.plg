@@ -3,7 +3,7 @@
 <!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.13">
+<!ENTITY version   "1.0.14">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -27,6 +27,11 @@
 </ICON>
 
   <CHANGES>
+## 1.0.14
+- Settings/Tools menu icon is now the SmokeSignal logo instead of the FontAwesome
+  flame: the pages set Icon="smokesignal.png" and the logo already ships under
+  icons/ (the FanCtrlPlus convention). The Plugins-tab logo is unchanged.
+
 ## 1.0.13
 - Logo + name + description in the Plugins tab now all work, the FanCtrlPlus way:
   the package ships a README.md (shows "SmokeSignal" + the description) and the
