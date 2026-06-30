@@ -77,7 +77,7 @@ const claimPath = claimFont.getPath(CLAIM, textX, claimBaseline, claimSize).toPa
 
 let logo = readFileSync(here('./logo.svg'), 'utf8').replace(/<\?xml[^>]*\?>\s*/, '');
 logo = logo.replace(/<svg\b[^>]*>/,
-  `<svg x="${LX.toFixed(1)}" y="${LY.toFixed(1)}" width="${LW}" height="${LH}" viewBox="0 0 1004.95 1004.95" xmlns="http://www.w3.org/2000/svg">`);
+  `<svg x="${LX.toFixed(1)}" y="${LY.toFixed(1)}" width="${LW}" height="${LH}" viewBox="0 0 993.59 993.56" xmlns="http://www.w3.org/2000/svg">`);
 
 const banner = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <rect width="${W}" height="${H}" fill="#ffffff"/>
