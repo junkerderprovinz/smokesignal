@@ -175,7 +175,7 @@
     if (mod) return mod;
     mod = document.createElement('div');
     mod.id = 'ss-modal';
-    mod.innerHTML = '<div class="ss-pan"><div class="ss-head"><span class="ss-htitle"><img class="ss-logo" src="/plugins/smokesignal/smokesignal.png?v=2" alt=""><span class="ss-title"></span></span><span class="ss-x" title="Close">&times;</span></div><div class="ss-body"></div></div>';
+    mod.innerHTML = '<div class="ss-pan"><div class="ss-head"><span class="ss-htitle"><img class="ss-logo" src="/plugins/smokesignal/smokesignal.png?v=3" alt=""><span class="ss-title"></span></span><span class="ss-x" title="Close">&times;</span></div><div class="ss-body"></div></div>';
     document.body.appendChild(mod);
     function close(){ mod.style.display = 'none'; }
     mod.addEventListener('click', function(e){ if (e.target === mod) close(); });
