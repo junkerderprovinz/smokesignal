@@ -3,7 +3,7 @@
 <!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
 <!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.0.14">
+<!ENTITY version   "1.0.15">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -27,6 +27,10 @@
 </ICON>
 
   <CHANGES>
+## 1.0.15
+- Reworked SmokeSignal logo (a cleaner flame-in-diamond) across the Plugins tab,
+  the menu icon, and the report window.
+
 ## 1.0.14
 - Settings/Tools menu icon is now the SmokeSignal logo instead of the FontAwesome
   flame: the pages set Icon="smokesignal.png" and the logo already ships under
