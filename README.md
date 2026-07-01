@@ -134,3 +134,7 @@ Assets (icon, banner) are generated with
 
 If SmokeSignal saved you a bad reboot, you can
 [buy me a coffee](https://buymeacoffee.com/junkerderprovinz). Thanks!
+
+---
+
+<sub>Part of a family of self-hosted Unraid apps + plugins by <b>junkerderprovinz</b> — see them all at <a href="https://github.com/junkerderprovinz">github.com/junkerderprovinz</a>, or install from <a href="https://unraid.net/community/apps">Community Applications</a>.</sub>
