@@ -27,6 +27,16 @@
 </ICON>
 
   <CHANGES>
+## 1.1.0
+- Branded ASCII startup banner. Running the engine from the Unraid console now
+  prints the "Junker der Provinz" house banner as its report header. It shows in
+  the human-readable report only; the WebGUI's JSON output is untouched, so the
+  report window is unaffected.
+- Reproducible packaging. The plugin is now built by plugin/pkg_build.sh
+  (identical locally and on CI): root:root ownership on every entry, LF-normalised
+  text files, and the banner embedded from .github/assets/banner-raw.txt. The
+  release workflow (release.yml) builds and publishes the .txz on a v* tag.
+
 ## 1.0.15
 - Reworked SmokeSignal logo (a cleaner flame-in-diamond) across the Plugins tab,
   the menu icon, and the report window.

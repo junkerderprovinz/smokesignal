@@ -385,6 +385,17 @@ banner() {
   if [ "$TTY" -eq 1 ]; then printf '\033[1;%sm%s\033[0m\n' "$VCOLOR" "$1"; else printf '%s\n' "$1"; fi
 }
 
+# Brand ASCII banner (the shared "Junker der Provinz" house signature). Human
+# report only: the --json branch above returns via `exit`, so the WebGUI/JSON
+# output is never touched by this. banner.txt is shipped in the package next to
+# this script (see plugin/pkg_build.sh); skip cleanly if it is absent.
+_ssdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_ssdir/banner.txt" ]; then
+  echo
+  cat "$_ssdir/banner.txt"
+  echo "   SmokeSignal  -  advisory pre-reboot health check for your Unraid box"
+fi
+
 echo
 banner "  ===== SMOKESIGNAL: $VERDICT ====="
 echo
