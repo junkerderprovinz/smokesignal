@@ -27,6 +27,18 @@
 </ICON>
 
   <CHANGES>
+## 1.1.1
+- CRITICAL uninstall fix (the same bug found and fixed in CannonadeCommander and
+  ShipLog). The removal script was wrapped in a bare `&lt;REMOVE&gt;` tag, which
+  Unraid's plugin manager does NOT execute (it only runs `&lt;FILE Method="remove"&gt;`
+  blocks) - so uninstalling silently left the plugin files, the installed package
+  and the cached flash .txz behind (Unraid still moved the flash .plg off, because
+  a remove that runs nothing trivially "succeeds"). Removal is now a proper
+  `&lt;FILE Run="/bin/bash" Method="remove"&gt;` block ending in `exit 0` (Unraid only
+  clears the flash .plg on a zero exit, else it reinstalls on boot); it removes the
+  exact registered package and wipes the files (SmokeSignal is a stateless
+  on-demand check - no daemon, no user data).
+
 ## 1.1.0
 - Branded ASCII startup banner. Running the engine from the Unraid console now
   prints the "Junker der Provinz" house banner as its report header. It shows in
@@ -153,14 +165,21 @@
     </INLINE>
   </FILE>
 
-  <!-- Remove -->
-  <REMOVE>
+  <!-- Remove. MUST be a <FILE ... Method="remove"> block: Unraid's plugin manager
+       only runs <FILE> elements, so a bare <REMOVE> tag is silently IGNORED and the
+       cleanup never runs. MUST end with exit 0, or Unraid leaves the .plg on the
+       flash and it reinstalls on boot. Stateless on-demand check: no daemon, no
+       user data - just drop the exact package + files. -->
+  <FILE Run="/bin/bash" Method="remove">
     <INLINE>
+      pkg=$(ls /var/log/packages/ 2>/dev/null | grep -E "^&pkg;(-[^-]+-[^-]+-[^-]+)?$" | head -n1)
+      if [ -n "$pkg" ]; then removepkg "$pkg" 2>/dev/null; fi
       removepkg "&pkg;" 2>/dev/null
       rm -rf "&emhttp;"
       rm -rf "&plgPath;"
       echo "SmokeSignal removed."
+      exit 0
     </INLINE>
-  </REMOVE>
+  </FILE>
 
 </PLUGIN>
