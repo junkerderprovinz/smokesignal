@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "smokesignal">
 <!ENTITY pkg       "smokesignal">
-<!ENTITY author    "junkerderprovinz">
-<!ENTITY version   "1.1.1">
+<!ENTITY author    "Junker der Provinz">
+<!ENTITY version   "1.1.2">
 <!ENTITY launch    "Main">
 <!ENTITY gitURL    "https://raw.githubusercontent.com/junkerderprovinz/smokesignal/main">
 <!ENTITY pluginURL "&gitURL;/plugin/smokesignal.plg">
@@ -27,6 +27,11 @@
 </ICON>
 
   <CHANGES>
+### 1.1.2
+- The plugin author shows as "Junker der Provinz".
+- Install/uninstall ceremony: the house ASCII banner prints on both, followed
+  by "SmokeSignal ist ready!" after an install and "Bye!" on removal.
+
 ## 1.1.1
 - CRITICAL uninstall fix (the same bug found and fixed in CannonadeCommander and
   ShipLog). The removal script was wrapped in a bare `&lt;REMOVE&gt;` tag, which
@@ -161,7 +166,9 @@
       # Enforce the exec bit on the engine (NTFS/CI builds can drop it)
       chmod +x "&emhttp;/&pkg;-check.sh" 2>/dev/null
       echo ""
-      echo "SmokeSignal &version; installed. The button sits next to Reboot on the Main tab; details under Tools > SmokeSignal."
+      cat /usr/local/emhttp/plugins/smokesignal/banner.txt 2>/dev/null
+      echo ""
+      echo "SmokeSignal ist ready!"
     </INLINE>
   </FILE>
 
@@ -172,12 +179,16 @@
        user data - just drop the exact package + files. -->
   <FILE Run="/bin/bash" Method="remove">
     <INLINE>
+      # goodbye ceremony FIRST, while the files still exist
+      cat /usr/local/emhttp/plugins/smokesignal/banner.txt 2>/dev/null
+      echo ""
+      echo "Bye!"
+      echo ""
       pkg=$(ls /var/log/packages/ 2>/dev/null | grep -E "^&pkg;(-[^-]+-[^-]+-[^-]+)?$" | head -n1)
       if [ -n "$pkg" ]; then removepkg "$pkg" 2>/dev/null; fi
       removepkg "&pkg;" 2>/dev/null
       rm -rf "&emhttp;"
       rm -rf "&plgPath;"
-      echo "SmokeSignal removed."
       exit 0
     </INLINE>
   </FILE>
