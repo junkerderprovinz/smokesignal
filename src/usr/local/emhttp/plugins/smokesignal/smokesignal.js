@@ -65,7 +65,8 @@
       smart_none: 'No disks found for SMART check.',
       smart_skip: 'smartctl not found — skipped SMART check.',
       smart_attr: 'SMART attribute warnings:{0}',
-      info_uptime: 'Uptime: {0}', info_kernel: 'Kernel: {0}', info_unraid: 'Unraid version: {0}'
+      info_uptime: 'Uptime: {0}', info_kernel: 'Kernel: {0}', info_unraid: 'Unraid version: {0}',
+      goto: 'Go to the source'
     },
     de: {
       title: 'SmokeSignal — Pre-Reboot-Check',
@@ -126,7 +127,8 @@
       smart_none: 'Keine Datenträger für SMART-Prüfung gefunden.',
       smart_skip: 'smartctl nicht gefunden — SMART-Prüfung übersprungen.',
       smart_attr: 'SMART-Attribut-Warnungen:{0}',
-      info_uptime: 'Laufzeit: {0}', info_kernel: 'Kernel: {0}', info_unraid: 'Unraid-Version: {0}'
+      info_uptime: 'Laufzeit: {0}', info_kernel: 'Kernel: {0}', info_unraid: 'Unraid-Version: {0}',
+      goto: 'Zur Stelle springen'
     }
   };
 
@@ -175,13 +177,48 @@
     if (mod) return mod;
     mod = document.createElement('div');
     mod.id = 'ss-modal';
-    mod.innerHTML = '<div class="ss-pan"><div class="ss-head"><span class="ss-htitle"><img class="ss-logo" src="/plugins/smokesignal/smokesignal.png?v=3" alt=""><span class="ss-title"></span></span><span class="ss-x" title="Close">&times;</span></div><div class="ss-body"></div></div>';
+    mod.innerHTML = '<div class="ss-pan"><div class="ss-head"><span class="ss-htitle"><img class="ss-logo" src="/plugins/smokesignal/smokesignal.png?v=4" alt=""><span class="ss-title"></span></span><span class="ss-x" title="Close">&times;</span></div><div class="ss-body"></div></div>';
     document.body.appendChild(mod);
     function close(){ mod.style.display = 'none'; }
     mod.addEventListener('click', function(e){ if (e.target === mod) close(); });
     mod.querySelector('.ss-x').addEventListener('click', close);
     document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
     return mod;
+  }
+
+  // Map a problem finding (by its message key) to the Unraid page where the
+  // user acts on it. Unraid has NO URL param to jump to a specific syslog line,
+  // so syslog/IO findings land on the full syslog viewer (/Tools/Syslog).
+  function ssLink(key){
+    switch (key) {
+      case 'syslog_crashes':
+      case 'io_errors':
+        return '/Tools/Syslog';
+      case 'vms_running':
+        return '/VMs';
+      case 'svc_docker_down':
+        return '/Settings/DockerSettings';
+      case 'svc_libvirt_down':
+        return '/Settings/VMSettings';
+      case 'risky_mount_found':
+      case 'binds_missing':
+      case 'stuck_loop_found':
+        return '/Docker';
+      case 'array_not_started':
+      case 'array_bad_devices':
+      case 'array_counts':
+      case 'array_op_running':
+      case 'array_parity_degraded':
+      case 'mover_running':
+      case 'flash_ro':
+      case 'flash_unmounted':
+      case 'space_full':
+      case 'smart_failing':
+      case 'smart_attr':
+        return '/Main';
+      default:
+        return null;   // svc_emhttp_down has no page (the WebGUI itself is down)
+    }
   }
 
   function renderReport(data){
@@ -206,9 +243,14 @@
       grp.forEach(function(x){
         var stt = x.status || 'info';
         var msg = ssT(loc, x.key, x.args); if (msg == null) msg = x.message || '';
+        // Only problem findings (warn/fail) get a click-through to the relevant page.
+        var link = (stt === 'warn' || stt === 'fail') ? ssLink(x.key) : null;
+        var cell = link
+          ? '<a href="'+esc(link)+'" title="'+esc(ssT(loc,'goto'))+'" style="color:inherit;text-decoration:underline;text-decoration-color:'+(scol[stt]||'#888')+';text-underline-offset:2px;cursor:pointer">'+esc(msg)+' <span style="opacity:.65">&#8599;</span></a>'
+          : esc(msg);
         h += '<div style="display:flex;gap:10px;padding:7px 4px;border-bottom:1px solid '+c.line+'">';
         h += '<div style="flex:0 0 22px;height:22px;width:22px;border-radius:50%;text-align:center;line-height:22px;font-weight:700;color:#fff;background:'+(scol[stt]||'#888')+'">'+(sico[stt]||'·')+'</div>';
-        h += '<div style="flex:1;word-break:break-word">'+esc(msg)+'</div></div>';
+        h += '<div style="flex:1;word-break:break-word">'+cell+'</div></div>';
       });
     });
     h += '<div style="margin-top:18px;color:'+c.muted+';font-size:11px;line-height:1.5">'+esc(ssT(loc,'foot'))+'</div></div>';
