@@ -27,6 +27,16 @@
 </ICON>
 
   <CHANGES>
+## 1.3.0
+- Click a problem finding in the check-result window to jump straight to the
+  relevant Unraid page: syslog and disk/IO findings open the System Log viewer,
+  array / parity / mover / space / flash / SMART findings open Main, running VMs
+  open the VMs tab, risky mounts / missing binds / a stuck image open Docker, and
+  a stopped dockerd or libvirt opens its Settings page. Only warning and error
+  findings are linked (a healthy check has nothing to jump to).
+- The report-window logo cache-buster is bumped so existing installs pick up the
+  new v1.2.0 flame-in-diamond logo in the modal header.
+
 ## 1.2.0
 - New three-variant SmokeSignal logo (flame-in-diamond): the Plugins-tab tile, menu icon
   and report window now use a flip-compatible double-ring variant that reads on every
