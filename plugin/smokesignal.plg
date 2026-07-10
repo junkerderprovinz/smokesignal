@@ -27,6 +27,17 @@
 </ICON>
 
   <CHANGES>
+## 1.4.0
+- The check-result window now shows a live progress bar while the engine runs,
+  with the current stage and a percentage, instead of a static "Running checks"
+  line. It reflects real progress (each check, plus per-disk during the slower
+  SMART scan) by streaming from the engine; if streaming is unavailable it falls
+  back to an animated bar, so the report always appears.
+- The report and the Tools page now follow the language configured in the Unraid
+  UI across all 26 supported languages (previously English and German only), the
+  same way ShipLog does. Right-to-left languages (Arabic, Hebrew) are laid out
+  accordingly, and any string not yet translated falls back to English.
+
 ## 1.3.0
 - Click a problem finding in the check-result window to jump straight to the
   relevant Unraid page: syslog and disk/IO findings open the System Log viewer,
