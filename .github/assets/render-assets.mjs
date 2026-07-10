@@ -41,7 +41,7 @@ const PLUGIN = '../../src/usr/local/emhttp/plugins/smokesignal/';
 // Each theme embeds the logo variant that reads on its background (no recolour).
 const THEMES = [
   { suffix: '', bg: '#ffffff', name: '#242626', claim: '#5a5d5e', logo: 'smokesignal-dunkel.svg' },
-  { suffix: '-dark', bg: '#0d1117', name: '#e6edf3', claim: '#9aa4ad', logo: 'smokesignal-hell.svg' },
+  { suffix: '-dark', bg: '#0d1117', name: '#ffffff', claim: '#9aa4ad', logo: 'smokesignal-hell.svg' },
 ];
 // -----------------------------------------------------------------------------
 
