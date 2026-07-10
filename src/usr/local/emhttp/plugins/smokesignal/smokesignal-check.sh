@@ -20,7 +20,18 @@
 set -u
 
 JSON=0
-[ "${1:-}" = "--json" ] && JSON=1
+PROGRESS=0
+for _a in "$@"; do
+  case "$_a" in
+    --json)     JSON=1 ;;
+    --progress) PROGRESS=1 ;;
+  esac
+done
+
+# Emit a progress marker (percent 0..100 + an i18n stage key) -- ONLY in
+# --progress mode, so the streaming WebGUI endpoint can drive a real progress
+# bar. Never printed in a normal --json run, so that JSON stays clean.
+sspush() { [ "$PROGRESS" -eq 1 ] && printf '@@SSP %s %s\n' "$1" "$2"; }
 
 WORST=0          # 0 GO, 1 CAUTION, 2 NO-GO
 JSON_ITEMS=""
@@ -89,6 +100,7 @@ DISKSINI=/var/local/emhttp/disks.ini
 # disk assigned (non-empty id) count -- an empty/never-used slot (e.g. an unused
 # second parity) reports as not-present and must NOT be flagged. Parity issues are
 # split out: a degraded parity is a caution, the array still boots.
+sspush 3 p_array
 DISKS_READ=0; bad_data=""; bad_parity=""
 if [ -r "$DISKSINI" ]; then
   DISKS_READ=1
@@ -147,6 +159,7 @@ else
 fi
 
 # ---- Mover -------------------------------------------------------------------
+sspush 14 p_mover
 if pgrep -f '/usr/local/sbin/mover' >/dev/null 2>&1 || pgrep -x move >/dev/null 2>&1; then
   add critical mover fail mover_running "" "Mover is running -- wait for it to finish before rebooting."
 else
@@ -154,6 +167,7 @@ else
 fi
 
 # ---- Containers mounting a host runtime dir (the libvirt-mount-race class) ---
+sspush 20 p_mounts
 if have docker && docker info >/dev/null 2>&1; then
   risky=""
   for cid in $(docker ps -q 2>/dev/null); do
@@ -177,6 +191,7 @@ else
 fi
 
 # ---- Stuck docker.img / libvirt.img loops -----------------------------------
+sspush 27 p_loops
 if have losetup; then
   LOOP="$(losetup -a 2>/dev/null)"
   problem=""
@@ -198,6 +213,7 @@ else
 fi
 
 # ---- Flash (USB boot) -------------------------------------------------------
+sspush 32 p_flash
 if mountpoint -q /boot; then
   tf="/boot/.smokesignal_write_test.$$"
   if ( : > "$tf" ) 2>/dev/null; then
@@ -215,6 +231,7 @@ fi
 # =============================================================================
 
 # ---- Crashes since last boot ------------------------------------------------
+sspush 38 p_crashes
 SYSLOG=/var/log/syslog
 if [ -r "$SYSLOG" ]; then
   pat='segfault|general protection|traps:|Out of memory|oom-killer|Killed process|Kernel panic|Call Trace|kernel BUG'
@@ -242,6 +259,7 @@ else
 fi
 
 # ---- Free space -------------------------------------------------------------
+sspush 48 p_space
 chk_space() {
   local path="$1" label="$2" thr="$3" use
   { mountpoint -q "$path" 2>/dev/null || [ -d "$path" ]; } || return 0
@@ -259,6 +277,7 @@ chk_space /var/lib/docker  docker 85
 [ -d /mnt/cache ] && chk_space /mnt/cache cache 90
 
 # ---- VMs running ------------------------------------------------------------
+sspush 54 p_vms
 if have virsh; then
   running="$(virsh list --state-running --name 2>/dev/null | grep -c .)"
   if [ "${running:-0}" -gt 0 ]; then
@@ -269,6 +288,7 @@ if have virsh; then
 fi
 
 # ---- Core services ----------------------------------------------------------
+sspush 60 p_services
 if mountpoint -q /var/lib/docker; then
   if pgrep -x dockerd >/dev/null 2>&1; then
     add warning svc_docker pass svc_docker_ok "" "dockerd running."
@@ -290,6 +310,7 @@ else
 fi
 
 # ---- Container bind sources exist ------------------------------------------
+sspush 66 p_binds
 if have docker && docker info >/dev/null 2>&1; then
   missing=""
   for cid in $(docker ps -q 2>/dev/null); do
@@ -309,6 +330,7 @@ if have docker && docker info >/dev/null 2>&1; then
 fi
 
 # ---- SMART health (deep: smartctl -H) --------------------------------------
+sspush 72 p_smart
 if have smartctl; then
   devs=""
   if [ -r /var/local/emhttp/disks.ini ]; then
@@ -319,8 +341,13 @@ if have smartctl; then
   fi
   TEMP_MAX=55
   bad=""; attrwarn=""; checked=0
+  # SMART is the slow phase (spins disks up); advance the bar per device so it
+  # does not sit frozen. Interpolate across the 72..96 band.
+  _sstot=$(printf '%s\n' "$devs" | grep -c .); _ssidx=0
   for d in $devs; do
     [ -z "$d" ] && continue
+    _ssidx=$((_ssidx+1))
+    [ "$PROGRESS" -eq 1 ] && [ "${_sstot:-0}" -gt 0 ] && sspush $((72 + _ssidx*24/_sstot)) p_smart
     dev="/dev/$d"; [ -b "$dev" ] || dev="$d"
     [ -b "$dev" ] || continue
     checked=$((checked+1))
@@ -358,6 +385,7 @@ fi
 # =============================================================================
 #  INFO
 # =============================================================================
+sspush 97 p_info
 up="$(uptime -p 2>/dev/null | sed 's/^up //')"
 [ -n "$up" ] && add info uptime info info_uptime "$up" "Uptime: $up"
 kr="$(uname -r 2>/dev/null)"
@@ -374,6 +402,7 @@ case "$WORST" in
   2) VERDICT="NO-GO";   VCOLOR=31 ;;
 esac
 
+sspush 100 p_done
 if [ "$JSON" -eq 1 ]; then
   printf '{"verdict":"%s","worst":%s,"generated":"%s","checks":[%s]}\n' \
     "$VERDICT" "$WORST" "$(date '+%Y-%m-%d %H:%M:%S')" "$JSON_ITEMS"
